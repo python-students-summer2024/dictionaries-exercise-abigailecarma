@@ -5,7 +5,7 @@ Do not run this file directly.  Rather, run main.py instead.
 """
 
 
-def bake_cookies(filepath):
+def bake_cookies(filepath): #calls check_if_file_edited(filepath)
     """
     Opens up the CSV data file from the path specified as an argument.
     - Each line in the file, except the first, is assumed to contain comma-separated information about one cookie.
@@ -16,26 +16,44 @@ def bake_cookies(filepath):
     :returns: A list of all cookie data, where each cookie is represented as a dictionary.
     """
     # write your code for this function below here.
+
+    check_if_file_edited(filepath) #checks if dietary restrictions have been added to the file and adds them if they haven't been added yet
+
     file = open(filepath, mode='r')
     lines = file.readlines()
     file.close()
     
-    all_cookies = []    #masterlist containing the dictionaries of each cookie
+    all_cookies = []
     
     for line in lines:
-        line = line.strip() #to remove \n
-        separated = line.split(',') #creates a list of each line with 4 elements
-        if not separated[0].isdigit():  #skips the first row since those are just headers
+        line = line.strip()
+        separated = line.split(',')
+        if not separated[0].isdigit():
             continue
-        dictionary = {}  #dictionary of each cookie/each line
+        dictionary = {}
         dictionary['id'] = int(separated[0])
         dictionary['title'] = str(separated[1])
         dictionary['description'] = str(separated[2])
         dictionary['price'] = float(separated[3][1:])
-        all_cookies.append(dictionary)
-        
-    return all_cookies  #masterlist containing the dictionaries of each cookie
+        if separated[4] == 'True':                 #stores values for 'sugar_free', 'gluten free', and 'contains nuts' as booleans
+            dictionary['sugar_free'] = True
+        elif separated[4] == 'False':
+            dictionary['sugar_free'] = False   
 
+        if separated[5] == 'True':
+            dictionary['gluten_free'] = True  
+        elif separated[5] == 'False':
+            dictionary['gluten_free'] = False  
+
+        if separated[6] == 'True':
+            dictionary['contains_nuts'] = True
+        elif separated[6] == 'False': 
+            dictionary['contains_nuts'] = False
+
+        all_cookies.append(dictionary)
+
+    return all_cookies
+    
 
 def welcome():
     """
@@ -49,32 +67,6 @@ def welcome():
     print("Welcome to the Python Cookie Shop!\nWe feed each according to their need.\n")
 
 
-def display_cookies(cookies):
-    """
-    Prints a list of all cookies in the shop to the user.
-    - Sample output - we show only two cookies here, but imagine the output continues for all cookiese:
-        Here are the cookies we have in the shop for you:
-
-          #1 - Basboosa Semolina Cake
-          This is a This is a traditional Middle Eastern dessert made with semolina and yogurt then soaked in a rose water syrup.
-          Price: $3.99
-
-          #2 - Vanilla Chai Cookie
-          Crisp with a smooth inside. Rich vanilla pairs perfectly with its Chai partner a combination of cinnamon ands ginger and cloves. Can you think of a better way to have your coffee AND your Vanilla Chai in the morning?
-          Price: $5.50
-
-    - If doing the extra credit version, ask the user for their dietary restrictions first, and only print those cookies that are suitable for the customer.
-
-    :param cookies: a list of all cookies in the shop, where each cookie is represented as a dictionary.
-    """
-    # write your code for this function below this line
-    print("Here are the cookies we have in the shop for you:\n")
-    for cookie in cookies:
-        print(f"#{cookie['id']} - {cookie['title']}")
-        print(cookie['description'])
-        print(f"Price: ${format(cookie['price'], '.2f')}\n")   
-
-
 def get_cookie_from_dict(id, cookies):
     """
     Finds the cookie that matches the given id from the full list of cookies.
@@ -86,10 +78,10 @@ def get_cookie_from_dict(id, cookies):
     # write your code for this function below this line
     for cookie in cookies:
         if int(id) == cookie['id']:
-            return cookie   #dictionary of selected cookie
+            return cookie
 
 
-def solicit_quantity(id, cookies):
+def solicit_quantity(id, cookies):  #calls get_cookie_from_dict(id, cookies)
     """
     Asks the user how many of the given cookie they would like to order.
     - Validates the response.
@@ -105,33 +97,33 @@ def solicit_quantity(id, cookies):
     :returns: The quantity the user entered, as an integer.
     """
     # write your code for this function below this line
-    cookie = get_cookie_from_dict(id, cookies)  #dictionary of the cookie selected
-    if cookie['title'][-1] == 's':  #if cookie title is already plural
+    cookie = get_cookie_from_dict(id, cookies)
+    if cookie['title'][-1] == 's':
         while True:
             num_cookie = input(f"My favorite! How many {cookie['title']} would you like? ")
-            if num_cookie.isdigit():    #validates that the response can be converted to integer
+            if num_cookie.isdigit():
                 break
         num_cookie = int(num_cookie)
-        total_price = num_cookie * cookie['price']  #calculates quantity multiplied by price of selected cookie
-        if num_cookie == 1: #to make the cookie noun singular since only 1 cookie is ordered
+        total_price = num_cookie * cookie['price']
+        if num_cookie == 1:
             print(f"Your subtotal for {num_cookie} {cookie['title'][:-1]} is ${format(total_price, '.2f')}.\n")
-        else:   #to make the cookie noun plural (leaves it as it is, since cookie noun is already plural)
+        else:
             print(f"Your subtotal for {num_cookie} {cookie['title']} is ${format(total_price, '.2f')}.\n")
-    else:   #if cookie title is singular
+    else:
         while True:
             num_cookie = input(f"My favorite! How many {cookie['title']}s would you like? ")
-            if num_cookie.isdigit():    #validates that the response is an integer
+            if num_cookie.isdigit():
                 break
         num_cookie = int(num_cookie)
-        total_price = num_cookie * cookie['price']  #calculates quantity multiplied by price of selected cookie
-        if num_cookie == 1: #to make the cookie noun singular since only 1 cookie is ordered (leaves it as it is)
+        total_price = num_cookie * cookie['price']
+        if num_cookie == 1:
             print(f"Your subtotal for {num_cookie} {cookie['title']} is ${format(total_price, '.2f')}.\n")
-        else:   #to make the cookie noun plural 
+        else:
             print(f"Your subtotal for {num_cookie} {cookie['title']}s is ${format(total_price, '.2f')}.\n")
-    return num_cookie   #integer representing quantity of the selected cookie
+    return num_cookie
 
 
-def solicit_order(cookies):
+def solicit_order(cookies): #calls solicit_quantity(id, cookies)
     """
     Takes the complete order from the customer.
     - Asks over-and-over again for the user to enter the id of a cookie they want to order until they enter 'finished', 'done', 'quit', or 'exit'.
@@ -148,22 +140,22 @@ def solicit_order(cookies):
     :returns: A list of the ids and quantities of each cookies the user wants to order.
     """
     # write your code for this function below this line
-    order_list = [] #list of all sub-orders, its elements are dictionaries
+    order_list = []
 
     while True:
         id_cookie = input("Please enter the id of any cookie you would like to purchase. (Enter 'finished', 'done', 'quit', or 'exit' if you have finished ordering): ")
-        if id_cookie in ['finished', 'done', 'quit', 'exit']:   #stops loop, stops asking the user for input
+        if id_cookie in ['finished', 'done', 'quit', 'exit']:
             break
-        elif id_cookie.isdigit():   #validates that the response can be converted to integer
+        elif id_cookie.isdigit(): 
             id_cookie = int(id_cookie)
             for cookie in cookies:
                 if id_cookie == cookie['id']:
-                    order_dict = {} #dictionary of selected cookie's id and quantity ordered
+                    order_dict = {}
                     order_dict['id'] = id_cookie
                     order_dict['quantity'] = solicit_quantity(id_cookie, cookies)
-                    order_list.append(order_dict)   #adds dictionary as an element to the list of all sub-orders
+                    order_list.append(order_dict)
     
-    return order_list   #list of all sub-orders, its elements are dictionaries
+    return order_list
 
 
 def display_order_total(order, cookies):
@@ -190,26 +182,127 @@ def display_order_total(order, cookies):
 
     total_price = 0
 
-    for ord in order:   #order: list of all sub-orders, its elements are dictionaries
+    for ord in order:
         for cookie in cookies:
-            if ord['id'] == cookie['id']:   #matches the id from the order and the id from the masterlist of cookies
+            if ord['id'] == cookie['id']:
                 title = cookie['title']
-                if ord['quantity'] == 1:    #ensures that the cookie noun is singular
-                    if title[-1] == 's':  
+                if ord['quantity'] == 1:
+                    if title[-1] == 's':
                         print(f"-1 {title[:-1]}")
                     else:
                         print(f"-1 {title}")
-                else:                       #ensures that the cookie noun is plural
+                else:
                     if title[-1] == 's':
                         print(f"-{ord['quantity']} {title}")
                     else:
                         print(f"-{ord['quantity']} {title}s")
-                total_price += ord['quantity'] * cookie['price']    #calculates total price of entire order by adding up all the prices of each sub-order
+                total_price += ord['quantity'] * cookie['price']
 
     print(f"\nYour total is ${format(total_price, '.2f')}.")
     print("Please pay with Bitcoin before picking-up.\n")
     print("Thank you!")
     print("-The Python Cookie Shop Robot.")
+
+
+def check_if_file_edited(filepath): #new function for extra credit      #calls add_diet_to_file(filepath)
+    file = open(filepath, mode='r')
+    lines = file.readlines()
+    file.close()
+
+    if 'sugar_free' not in lines[0] and 'gluten_free' not in lines[0] and 'contains_nuts' not in lines[0]:
+        add_diet_to_file(filepath)  #adds the dietary restrictions to cookies.csv only if they haven't been added yet
+
+
+def add_diet_to_file(filepath): #new function for extra credit
+    file = open(filepath, mode='r')
+    lines = file.readlines()
+    file.close()
+
+    first_row = "id,title,description,price,sugar_free,gluten_free,contains_nuts\n"
+
+    new_diet_all = {
+        1: {'sugar_free': True, 'gluten_free': False, 'contains_nuts': False},
+        2: {'sugar_free': False, 'gluten_free': True, 'contains_nuts': False},
+        3: {'sugar_free': False, 'gluten_free': True, 'contains_nuts': False},
+        4: {'sugar_free': True, 'gluten_free': True, 'contains_nuts': False},
+        5: {'sugar_free': False, 'gluten_free': True, 'contains_nuts': True},
+        6: {'sugar_free': False, 'gluten_free': True, 'contains_nuts': False},
+        7: {'sugar_free': False, 'gluten_free': True, 'contains_nuts': False},
+        8: {'sugar_free': False, 'gluten_free': True, 'contains_nuts': True},
+        9: {'sugar_free': True, 'gluten_free': True, 'contains_nuts': False},
+        10: {'sugar_free': False, 'gluten_free': False, 'contains_nuts': False}}
+
+    list_new_lines = [first_row]    #list containing updated lines, headers are pre-added already in the first row
+    
+    for line in lines[1:]:  #skips first row since it contains the names of the keys or headers
+        line_turned_list = line.strip().split(',')
+        id_cookie = int(line_turned_list[0])
+        diets_cookie = new_diet_all[id_cookie]
+        edited_line = line.strip() + f",{diets_cookie['sugar_free']},{diets_cookie['gluten_free']},{diets_cookie['contains_nuts']}\n"
+        list_new_lines.append(edited_line)
+    
+    # writes list_new_lines into cookies.csv, overwriting original text
+    file = open(filepath, mode='w')
+    for line in list_new_lines:
+        file.write(line)
+    file.close()
+
+
+def ask_allergies_and_display(cookies): #new function for extra credit
+    print("We'd hate to trigger an allergic reaction in your body. So please answer the following questions:\n")
+    
+    while True:
+        nuts_allergic = input("Are you allergic to nuts? ").lower()
+        if nuts_allergic in ['yes', 'y', 'no', 'n']:
+            break
+    while True:
+        gluten_allergic = input("Are you allergic to gluten? ").lower()
+        if gluten_allergic in ['yes', 'y', 'no', 'n']:
+            break
+    while True:
+        is_diabetic = input("Do you suffer from diabetes? ").lower()
+        if is_diabetic in ['yes', 'y', 'no', 'n']:
+            break
+    
+    friendly_cookies = []
+
+    for cookie in cookies:
+        include_cookie = True
+
+        if nuts_allergic in ['yes', 'y']:
+            if cookie['contains_nuts']:
+                include_cookie = False
+        if gluten_allergic in ['yes', 'y']:
+            if not cookie['gluten_free']:
+                include_cookie = False
+        if is_diabetic in ['yes', 'y']:
+            if not cookie['sugar_free']:
+                include_cookie = False
+
+        if include_cookie == True:
+            friendly_cookies.append(cookie)
+
+    if nuts_allergic in ['yes', 'y']:
+        n = "without nuts, "
+    else:
+        n = ""
+
+    if gluten_allergic in ['yes', 'y']:
+        g = "without gluten, "
+    else:
+        g = ""
+
+    if is_diabetic in ['yes', 'y']:
+        s = "without sugar, "
+    else:
+        s = ""
+
+    #displays user-friendly cookies
+    print(f"\nGreat! Here are the cookies {n}{g}{s}that we think you might like:\n")
+    for cookie in friendly_cookies:
+        print(f"#{cookie['id']} - {cookie['title']}")
+        print(cookie['description'])
+        print(f"Price: ${format(cookie['price'], '.2f')}\n")
 
 
 def run_shop(cookies):
@@ -222,6 +315,7 @@ def run_shop(cookies):
     """
     # write your code for this function below here.
     welcome()
-    display_cookies(cookies)
+    ask_allergies_and_display(cookies)    #replaced def display_cookies(cookies) from cookie_shop.py
     order = solicit_order(cookies)
     display_order_total(order, cookies)
+    
